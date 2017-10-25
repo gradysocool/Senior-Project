@@ -1,5 +1,7 @@
 package chess;
 
+import java.util.ArrayList;
+
 public class Square {
 	private int file;
 	private int rank;
@@ -18,46 +20,13 @@ public class Square {
 	public Square(int file, int rank){
 		this.file = file;
 		this.rank = rank;
-		pieceOnSquare = new Piece(true, 0);
+		pieceOnSquare = new Piece(true, 0, this);
 	}
 	public void changePiece(Piece p){
 		pieceOnSquare = p;
 	}
-	public Square[] availableMoveSquares(Board b){
-		Square[] ary = new Square[64];
-		for(Square[] sq :  b.getBoardSquares()){
-			for(Square s : sq){
-				switch (s.getPiece().getType()){
-				//To Be Implemented
-				}
-			}
-		}
-		return ary;
-	}
-	public Square[] legalMoveSquaresWithoutCheck(Board b){
-		Square[] ary = new Square[64];
-		for(Square s: availableMoveSquares(b)){
-			//To Be Implemented
-		}
-		return ary;
-	}
-	public Square[] legalMoveSquares(Board b){
-		Square[] ary = new Square[64];
-		int i = 0;
-		for(Square s: legalMoveSquaresWithoutCheck(b)){
-			Piece currentSquarePrevious = pieceOnSquare;
-			Piece otherSquarePrevious = s.getPiece();
-			changePiece(new Piece(true, 0));
-			s.changePiece(currentSquarePrevious);
-			if(!b.isInCheck(currentSquarePrevious.getColor())){
-				ary[i]=s;
-				i++;
-			}
-			changePiece(currentSquarePrevious);
-			s.changePiece(otherSquarePrevious);
-		}
-		return ary;
-	}
+	
+	
 	public Piece getPiece(){
 		return pieceOnSquare;
 	}
@@ -66,5 +35,11 @@ public class Square {
 		s += (char)((int)'a'+ file - 1);
 		s += rank;
 		return s;
+	}
+	public int getFile(){
+		return file;
+	}
+	public int getRank(){
+		return rank;
 	}
 }
