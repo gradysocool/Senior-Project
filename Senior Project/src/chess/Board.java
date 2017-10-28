@@ -530,7 +530,7 @@ public class Board {
 							enPessantFile = finish.getFile();
 						}
 						// pawn promotion
-						if (finish.getRank() == 8) {
+						if (finish.getRank() == 1) {
 							p.getSquare().changePiece(
 									new Piece(WHITE, EMPTY, p.getSquare()));
 							finish.changePiece(new Piece(BLACK,
