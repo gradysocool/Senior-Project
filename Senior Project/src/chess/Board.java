@@ -92,7 +92,7 @@ public class Board {
 		for (Piece p : getPieces(!color)) {
 			// Check all available moves of the piece on this square
 			// disregarding check to other king.
-			for (Square t : legalMoveSquaresWithoutCheck(p)) {
+			for (Square t : checkableMoveSquares(p)) {
 				// If square is the same square as our king return true
 				if (color) {
 					if (t.toString().equals(kingSquareWhite.toString())) {
@@ -278,13 +278,46 @@ public class Board {
 		for (Square s : legalMoveSquaresWithoutCheck(p)) {
 			Piece currentSquarePrevious = p;
 			Piece otherSquarePrevious = s.getPiece();
+			Square previousSquare = p.getSquare();
 			p.getSquare().changePiece(new Piece(true, EMPTY, p.getSquare()));
+			p.changeSquare(s);
 			s.changePiece(currentSquarePrevious);
+			if(p.getType()==KING){
+				if(p.getColor()){
+					kingSquareWhite = p.getSquare();
+				} else {
+					kingSquareBlack = p.getSquare();
+				}
+			}
 			if (!isInCheck(currentSquarePrevious.getColor())) {
 				ary.add(s);
 			}
-			p.getSquare().changePiece(currentSquarePrevious);
+			previousSquare.changePiece(currentSquarePrevious);
 			s.changePiece(otherSquarePrevious);
+			p.changeSquare(previousSquare);
+			if(p.getType()==KING){
+				if(p.getColor()){
+					kingSquareWhite = p.getSquare();
+				} else {
+					kingSquareBlack = p.getSquare();
+				}
+			}
+		}
+		return ary;
+	}
+
+	public ArrayList<Square> checkableMoveSquares(Piece p) {
+		ArrayList<Square> ary = new ArrayList<Square>();
+		for (Square s : p.availableMoveSquares(this)) {
+			if (p.getType() != 1
+					|| Math.abs(s.getFile() - p.getSquare().getFile()) < 2) {
+				if (checkSquaresBetween(p.getSquare(), s)) {
+					if (s.getPiece().getColor() != p.getColor()
+							|| s.getPiece().getType() == EMPTY) {
+						ary.add(s);
+					}
+				}
+			}
 		}
 		return ary;
 	}
@@ -413,14 +446,17 @@ public class Board {
 						// Remove Castling ability.
 						canWhiteCastleKingside = false;
 						canWhiteCastleQueenside = false;
+						kingSquareWhite = p.getSquare();
 						break;
 					case PAWN:
 						// if en Pessant, remove the captured pawn.
 						if (p.getSquare().getFile() != finish.getFile()
 								&& finish.getPiece().getType() == EMPTY) {
-							boardSquares[finish.getFile()-1][4]
-									.changePiece(new Piece(WHITE, EMPTY,
-											boardSquares[finish.getFile()-1][4]));
+							boardSquares[finish.getFile() - 1][4]
+									.changePiece(new Piece(
+											WHITE,
+											EMPTY,
+											boardSquares[finish.getFile() - 1][4]));
 						}
 						// if the pawn moves forward 2, notify that it can be
 						// captured en Pessant.
@@ -514,14 +550,17 @@ public class Board {
 						// Remove Castling ability.
 						canWhiteCastleKingside = false;
 						canWhiteCastleQueenside = false;
+						kingSquareBlack = p.getSquare();
 						break;
 					case PAWN:
 						// if en Pessant, remove the captured pawn.
 						if (p.getSquare().getFile() != finish.getFile()
 								&& finish.getPiece().getType() == EMPTY) {
-							boardSquares[finish.getFile()-1][3]
-									.changePiece(new Piece(WHITE, EMPTY,
-											boardSquares[finish.getFile()-1][3]));
+							boardSquares[finish.getFile() - 1][3]
+									.changePiece(new Piece(
+											WHITE,
+											EMPTY,
+											boardSquares[finish.getFile() - 1][3]));
 						}
 						// if the pawn moves forward 2, notify that it can be
 						// captured en Pessant.
@@ -629,14 +668,14 @@ public class Board {
 					p = k;
 				}
 			}
-			finish = boardSquares[6][turn?0:7];
+			finish = boardSquares[6][turn ? 0 : 7];
 		} else if (s.equals("O-O-O")) {
 			for (Piece k : getPieces(turn)) {
 				if (k.getType() == 1) {
 					p = k;
 				}
 			}
-			finish = boardSquares[2][turn?0:7];
+			finish = boardSquares[2][turn ? 0 : 7];
 		} else {
 			switch (s.charAt(0)) {
 			case 'K':
@@ -656,7 +695,7 @@ public class Board {
 				break;
 			// If the string does not start like above, it is a pawn move.
 			default:
-				
+
 				type = 6;
 				pieceFile = (int) s.charAt(0) - 96;
 				s = " " + s;
@@ -692,15 +731,15 @@ public class Board {
 					if (pieceRank != 0 && pieceRank != k.getSquare().getRank()) {
 						continue;
 					}
-					for(Square sq: k.availableMoveSquares(this)){
-						if(sq.equals(finish)){
+					for (Square sq : legalMoveSquares(k)) {
+						if (sq.equals(finish)) {
 							p = k;
 						}
 					}
 				}
 			}
-			
-			if(p.getType()==0){
+
+			if (p.getType() == 0) {
 				System.out.println("Syntax Error");
 			}
 		}
