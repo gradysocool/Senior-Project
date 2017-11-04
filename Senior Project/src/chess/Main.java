@@ -11,6 +11,8 @@ public class Main {
 	private static Board b;
 
 	public static void main(String[] args) {
+		long startTime = System.currentTimeMillis();
+		int counter=0;
 		ArrayList<ArrayList<String>> ary = readPGN("");
 		for (int i = 0; i < ary.size(); i++) {
 
@@ -20,16 +22,15 @@ public class Main {
 				System.out.print("Game: " + i);
 				System.out.println("Make move");
 				System.out.println(ary.get(i).get(j));
-				long startTime = System.currentTimeMillis();
+				
 				readCommand(ary.get(i).get(j), b);
-				long endTime = System.currentTimeMillis();
-				System.out.println(b.allValidMoves().size());
-				System.out.println((endTime - startTime) + " milliseconds");
-		        if(endTime-startTime > 50){
-		        	System.exit(1);
-		        }
+				counter++;
+		        
 			}
 		}
+		long endTime = System.currentTimeMillis();
+		System.out.println(counter + " moves");
+		System.out.println((endTime - startTime) + " milliseconds");
 	}
 
 	public static void test(Move m) {
