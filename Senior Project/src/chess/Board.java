@@ -80,6 +80,19 @@ public class Board {
 		turn = WHITE;
 	}
 
+	public Board(Square[][] bs, Square ksw, Square ksb, int epf, boolean cwck,
+			boolean cbck, boolean cwcq, boolean cbcq, boolean t) {
+		boardSquares = bs;
+		kingSquareWhite = ksw;
+		kingSquareBlack = ksb;
+		enPessantFile = epf;
+		canWhiteCastleKingside = cwck;
+		canWhiteCastleQueenside = cwcq;
+		canBlackCastleKingside = cbck;
+		canBlackCastleQueenside = cbcq;
+		turn = t;
+	}
+
 	/**
 	 * 
 	 * @param color
@@ -118,7 +131,9 @@ public class Board {
 		}
 		return false;
 	}
-
+	public ArrayList<Move> allValidMoves() {
+		return allValidMoves(turn);
+	}
 	public ArrayList<Move> allValidMoves(boolean color) {
 		ArrayList<Move> ary = new ArrayList<Move>();
 		for (Piece p : getPieces(color)) {
@@ -132,6 +147,7 @@ public class Board {
 	public void checkEndConditions(boolean color) {
 		if (getPieces(WHITE).size() + getPieces(BLACK).size() == 2) {
 			System.out.println("Draw by insufficient material");
+			gameInProgress = false;
 		}
 		if (allValidMoves(color).size() == 0) {
 			if (isInCheck(color)) {
@@ -143,6 +159,7 @@ public class Board {
 			} else {
 				System.out.println("Draw by Stalemate!");
 			}
+			gameInProgress = false;
 		}
 	}
 
@@ -276,14 +293,26 @@ public class Board {
 		ArrayList<Square> ary = new ArrayList<Square>();
 
 		for (Square s : legalMoveSquaresWithoutCheck(p)) {
+			boolean enPessant = false;
+			if (p.getType() == PAWN && p.getSquare().getFile() != s.getFile()
+					&& s.getPiece().getType() == EMPTY) {
+				enPessant = true;
+				if (p.getColor()) {
+					boardSquares[s.getFile() - 1][4].changePiece(new Piece(
+							true, EMPTY, boardSquares[s.getFile() - 1][4]));
+				} else {
+					boardSquares[s.getFile() - 1][3].changePiece(new Piece(
+							true, EMPTY, boardSquares[s.getFile() - 1][3]));
+				}
+			}
 			Piece currentSquarePrevious = p;
 			Piece otherSquarePrevious = s.getPiece();
 			Square previousSquare = p.getSquare();
 			p.getSquare().changePiece(new Piece(true, EMPTY, p.getSquare()));
 			p.changeSquare(s);
 			s.changePiece(currentSquarePrevious);
-			if(p.getType()==KING){
-				if(p.getColor()){
+			if (p.getType() == KING) {
+				if (p.getColor()) {
 					kingSquareWhite = p.getSquare();
 				} else {
 					kingSquareBlack = p.getSquare();
@@ -295,8 +324,17 @@ public class Board {
 			previousSquare.changePiece(currentSquarePrevious);
 			s.changePiece(otherSquarePrevious);
 			p.changeSquare(previousSquare);
-			if(p.getType()==KING){
-				if(p.getColor()){
+			if (enPessant) {
+				if (p.getColor()) {
+					boardSquares[s.getFile() - 1][4].changePiece(new Piece(
+							BLACK, PAWN, boardSquares[s.getFile() - 1][4]));
+				} else {
+					boardSquares[s.getFile() - 1][3].changePiece(new Piece(
+							WHITE, PAWN, boardSquares[s.getFile() - 1][3]));
+				}
+			}
+			if (p.getType() == KING) {
+				if (p.getColor()) {
 					kingSquareWhite = p.getSquare();
 				} else {
 					kingSquareBlack = p.getSquare();
@@ -394,6 +432,14 @@ public class Board {
 			}
 		}
 		return true;
+	}
+
+	public Board getBoardAfterMove(Move m) {
+		Board b = new Board(boardSquares, kingSquareWhite, kingSquareBlack,
+				enPessantFile, canWhiteCastleKingside, canWhiteCastleQueenside,
+				canBlackCastleKingside, canBlackCastleQueenside, turn);
+		b.makeMove(m);
+		return b;
 	}
 
 	public void makeMove(Move m) {
@@ -548,8 +594,8 @@ public class Board {
 							checkEndConditions(!color);
 						}
 						// Remove Castling ability.
-						canWhiteCastleKingside = false;
-						canWhiteCastleQueenside = false;
+						canBlackCastleKingside = false;
+						canBlackCastleQueenside = false;
 						kingSquareBlack = p.getSquare();
 						break;
 					case PAWN:
@@ -588,10 +634,10 @@ public class Board {
 					case ROOK:
 						// Remove castling ability as needed
 						if (p.getSquare().getFile() == 8) {
-							canWhiteCastleKingside = false;
+							canBlackCastleKingside = false;
 						}
 						if (p.getSquare().getFile() == 1) {
-							canWhiteCastleQueenside = false;
+							canBlackCastleQueenside = false;
 						}
 						// Continue normally
 						p.getSquare().changePiece(
@@ -612,8 +658,10 @@ public class Board {
 					}
 				}
 				turn = !turn;
+				System.out.println(enPessantFile);
 			} else {
 				System.out.println("Invalid Move!");
+				System.exit(1);
 			}
 		} else {
 			System.out.println("Wrong Turn!");
@@ -645,7 +693,11 @@ public class Board {
 		int finishRank;
 		int promoteType = 0;
 		Square finish;
+		if (s.charAt(s.length() - 1) == '+' || s.charAt(s.length() - 1) == '#') {
+			s = s.substring(0, s.length() - 1);
+		}
 		// Evaluate promotions. Ex:e8=Q.
+
 		if (s.charAt(s.length() - 2) == '=') {
 			switch (s.charAt(s.length() - 1)) {
 			case 'Q':
@@ -741,8 +793,19 @@ public class Board {
 
 			if (p.getType() == 0) {
 				System.out.println("Syntax Error");
+				System.exit(1);
 			}
+
 		}
 		return new Move(p, finish, promoteType);
+	}
+
+	public void endgame() {
+		gameInProgress = false;
+
+	}
+
+	public boolean checkProgress() {
+		return gameInProgress;
 	}
 }

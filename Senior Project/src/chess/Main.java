@@ -1,17 +1,34 @@
 package chess;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
 	private static Board b;
 
 	public static void main(String[] args) {
-		b = new Board();
-		Scanner sc = new Scanner(System.in);
-		// Enter a move from square to square from starting position to test
-		while(true){
-			System.out.println("Make move");
-			readCommand(sc.nextLine(),b);
+		ArrayList<ArrayList<String>> ary = readPGN("");
+		for (int i = 0; i < ary.size(); i++) {
+
+			b = new Board();
+			Scanner sc = new Scanner(System.in);
+			for (int j = 0; j < ary.get(i).size(); j++) {
+				System.out.print("Game: " + i);
+				System.out.println("Make move");
+				System.out.println(ary.get(i).get(j));
+				long startTime = System.currentTimeMillis();
+				readCommand(ary.get(i).get(j), b);
+				long endTime = System.currentTimeMillis();
+				System.out.println(b.allValidMoves().size());
+				System.out.println((endTime - startTime) + " milliseconds");
+		        if(endTime-startTime > 50){
+		        	System.exit(1);
+		        }
+			}
 		}
 	}
 
@@ -69,8 +86,7 @@ public class Main {
 						System.out.print(" ");
 						break;
 					}
-				}
-				else{
+				} else {
 					switch (b.getBoardSquares()[j][i].getPiece().getType()) {
 					case 1:
 						System.out.print("k");
@@ -95,18 +111,87 @@ public class Main {
 						break;
 					}
 				}
-				
+
 			}
 			System.out.print("|\n");
 		}
 		System.out.println("----------------");
 	}
-	public static void readCommand(String s, Board b){
-		if(s.equals("exit")){
+
+	public static void readCommand(String s, Board b) {
+		if (s.equals("exit")) {
 			System.exit(0);
 		}
-		else{
+		if (s.equals("1-0") || s.equals("0-1") || s.equals("1/2-1/2")) {
+			b.endgame();
+		} else {
 			b.makeMove(b.convertString(s));
 		}
+	}
+
+	public static ArrayList<ArrayList<String>> readPGN(String file) {
+		ArrayList<ArrayList<String>> games = new ArrayList<ArrayList<String>>();
+		BufferedReader br = null;
+		String line;
+		boolean moreGames = true;
+		try {
+			br = new BufferedReader(new FileReader(
+					"C:\\Users\\User\\AppData\\Local\\Temp\\Adams.pgn"));
+		} catch (FileNotFoundException fnfex) {
+			System.out.println(fnfex.getMessage() + "Error reading file.");
+		}
+		while (moreGames) {
+			ArrayList<String> game = new ArrayList<String>();
+			String s = "";
+			// Cuts out extraneous information before game (end is indicated by
+			// an empty line)
+			try {
+				while ((line = br.readLine()) != null) {
+					if (line.length() == 0) {
+						break;
+					}
+				}
+			} catch (IOException ioex) {
+				System.out.println(ioex.getMessage() + "Error reading file.");
+			}
+			// Get the game as a string (end is indicated by an empty line)
+			try {
+				while ((line = br.readLine()) != null) {
+					if (line.length() == 0 && s.length() > 0) {
+						break;
+					}
+					s = s + line + " ";
+				}
+			} catch (IOException ioex) {
+				System.out.println(ioex.getMessage() + "Error reading file.");
+			}
+			try {
+				if ((line = br.readLine()) == null) {
+					moreGames = false;
+				}
+			} catch (IOException ioex) {
+				System.out.println(ioex.getMessage() + "Error reading file.");
+			}
+			String[] split = s.split(" ");
+			for (int i = 0; i < split.length; i++) {
+				String move = split[i];
+				if (move.length() > 0) {
+					if (move.length() > 2) {
+						if (move.indexOf('.') > 0) {
+							move = move.substring(move.indexOf('.') + 1);
+						}
+					}
+					game.add(move);
+				}
+			}
+			games.add(game);
+		}
+		try {
+			br.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return games;
 	}
 }
