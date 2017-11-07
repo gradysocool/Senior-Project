@@ -11,26 +11,33 @@ public class Main {
 	private static Board b;
 
 	public static void main(String[] args) {
-		long startTime = System.currentTimeMillis();
-		int counter=0;
-		ArrayList<ArrayList<String>> ary = readPGN("");
-		for (int i = 0; i < ary.size(); i++) {
+//		long startTime = System.currentTimeMillis();
+//		int counter=0;
+//		ArrayList<ArrayList<String>> ary = readPGN("");
+//		for (int i = 0; i < ary.size(); i++) {
+//
+//			b = new Board();
 
-			b = new Board();
-			Scanner sc = new Scanner(System.in);
-			for (int j = 0; j < ary.get(i).size(); j++) {
-				System.out.print("Game: " + i);
-				System.out.println("Make move");
-				System.out.println(ary.get(i).get(j));
-				
-				readCommand(ary.get(i).get(j), b);
-				counter++;
-		        
-			}
+//			for (int j = 0; j < ary.get(i).size(); j++) {
+//				System.out.print("Game: " + i);
+//				System.out.println("Make move");
+//				System.out.println(ary.get(i).get(j));
+//				readCommand(ary.get(i).get(j), b);
+//				System.out.println(b.getUnweightedEvaluation(1));
+//				counter++;
+//			}
+//		}
+//		long endTime = System.currentTimeMillis();
+//		System.out.println(counter + " moves");
+//		System.out.println((endTime - startTime) + " milliseconds");
+		b = new Board();
+		Scanner sc = new Scanner(System.in);
+		while(b.checkProgress()==2){
+			System.out.println("Make Move");
+			readCommand(sc.nextLine(), b);
+			System.out.println(b.getUnweightedEvaluation(1));
+			printBoard(b);
 		}
-		long endTime = System.currentTimeMillis();
-		System.out.println(counter + " moves");
-		System.out.println((endTime - startTime) + " milliseconds");
 	}
 
 	public static void test(Move m) {

@@ -128,10 +128,10 @@ public class Piece {
 							}
 							if (Math.abs(s.getFile() - square.getFile()) == 1) {
 								if (s.getPiece().getColor() != color
-										&& s.getPiece().getType() != 0) {
+										&& s.getPiece().getType() != EMPTY) {
 									ary.add(s);
 								}
-								if (b.getEnPessantFile() == s.getFile()) {
+								if (b.getEnPessantFile() == s.getFile()&&square.getRank()==5) {
 									ary.add(s);
 								}
 							}
@@ -149,10 +149,10 @@ public class Piece {
 							}
 							if (Math.abs(s.getFile() - square.getFile()) == 1) {
 								if (s.getPiece().getColor() != color
-										&& s.getPiece().getType() != 0) {
+										&& s.getPiece().getType() != EMPTY) {
 									ary.add(s);
 								}
-								if (b.getEnPessantFile() == s.getFile()) {
+								if (b.getEnPessantFile() == s.getFile()&&square.getRank()==4) {
 									ary.add(s);
 								}
 							}

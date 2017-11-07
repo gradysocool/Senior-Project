@@ -42,4 +42,14 @@ public class Square {
 	public int getRank(){
 		return rank;
 	}
+	public double getEvaluationValue(boolean color){
+		double score = 0;
+		score += 4.0/Math.pow(2,Math.abs(4.5-getFile())+0.5);
+		if(color){
+		score += getRank()/4;
+		} else{
+			score += 2 - getRank()/4;
+		}
+		return score;
+	}
 }

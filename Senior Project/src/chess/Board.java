@@ -23,7 +23,7 @@ public class Board {
 	private boolean canBlackCastleKingside;
 	private boolean canBlackCastleQueenside;
 	private boolean turn;
-	private boolean gameInProgress;
+	private int gameInProgress;
 
 	public Board() {
 		// Set up board squares with pieces in starting position.
@@ -78,11 +78,21 @@ public class Board {
 		canBlackCastleKingside = true;
 		canBlackCastleQueenside = true;
 		turn = WHITE;
+		gameInProgress = 2;
 	}
 
 	public Board(Square[][] bs, Square ksw, Square ksb, int epf, boolean cwck,
-			boolean cbck, boolean cwcq, boolean cbcq, boolean t) {
-		boardSquares = bs;
+			boolean cbck, boolean cwcq, boolean cbcq, boolean t, int gip) {
+		boardSquares = new Square[8][8];
+		for (int i = 1; i <= 8; i++) {
+			for (int j = 1; j <= 8; j++) {
+				Square s = bs[i - 1][j - 1];
+				boardSquares[i - 1][j - 1] = new Square(i, j);
+				Piece p = new Piece(s.getPiece().getColor(), s.getPiece()
+						.getType(), boardSquares[i - 1][j - 1]);
+				boardSquares[i - 1][j - 1].changePiece(p);
+			}
+		}
 		kingSquareWhite = ksw;
 		kingSquareBlack = ksb;
 		enPessantFile = epf;
@@ -91,6 +101,7 @@ public class Board {
 		canBlackCastleKingside = cbck;
 		canBlackCastleQueenside = cbcq;
 		turn = t;
+		gameInProgress = gip;
 	}
 
 	/**
@@ -131,9 +142,11 @@ public class Board {
 		}
 		return false;
 	}
+
 	public ArrayList<Move> allValidMoves() {
 		return allValidMoves(turn);
 	}
+
 	public ArrayList<Move> allValidMoves(boolean color) {
 		ArrayList<Move> ary = new ArrayList<Move>();
 		for (Piece p : getPieces(color)) {
@@ -147,19 +160,22 @@ public class Board {
 	public void checkEndConditions(boolean color) {
 		if (getPieces(WHITE).size() + getPieces(BLACK).size() == 2) {
 			System.out.println("Draw by insufficient material");
-			gameInProgress = false;
+			gameInProgress = 0;
 		}
 		if (allValidMoves(color).size() == 0) {
 			if (isInCheck(color)) {
 				if (color) {
 					System.out.println("Black wins by Checkmate!");
+					gameInProgress = -1;
 				} else {
 					System.out.println("White wins by Checkmate!");
+					gameInProgress = 1;
 				}
 			} else {
 				System.out.println("Draw by Stalemate!");
+				gameInProgress = 0;
 			}
-			gameInProgress = false;
+
 		}
 	}
 
@@ -436,9 +452,9 @@ public class Board {
 
 	public Board getBoardAfterMove(Move m) {
 		Board b = new Board(boardSquares, kingSquareWhite, kingSquareBlack,
-				enPessantFile, canWhiteCastleKingside, canWhiteCastleQueenside,
-				canBlackCastleKingside, canBlackCastleQueenside, turn);
-		b.makeMove(m);
+				enPessantFile, canWhiteCastleKingside, canBlackCastleKingside,
+				canWhiteCastleQueenside, canBlackCastleQueenside, turn, gameInProgress);
+		b.makeMove(b.convertString(m.toString(this)));
 		return b;
 	}
 
@@ -658,7 +674,7 @@ public class Board {
 					}
 				}
 				turn = !turn;
-				System.out.println(enPessantFile);
+
 			} else {
 				System.out.println("Invalid Move!");
 				System.exit(1);
@@ -666,7 +682,8 @@ public class Board {
 		} else {
 			System.out.println("Wrong Turn!");
 		}
-		Main.printBoard(this);
+		//Main.printBoard(this);
+
 	}
 
 	public int getEnPessantFile() {
@@ -801,11 +818,131 @@ public class Board {
 	}
 
 	public void endgame() {
-		gameInProgress = false;
+		gameInProgress = 0;
 
 	}
 
-	public boolean checkProgress() {
+	public int checkProgress() {
 		return gameInProgress;
+	}
+
+	public double getUnweightedEvaluation(int depth) {
+		Move bestMove = null;
+		double score;
+
+		if (turn) {
+			score = -500;
+			for (Move m : allValidMoves()) {
+				if (depth == 0) {
+					double newScore = getBoardAfterMove(m).getQuickEvaluation();
+					if (newScore > score) {
+						bestMove = m;
+						score = newScore;
+					}
+				} else {
+					double newScore = getBoardAfterMove(m)
+							.getUnweightedEvaluation(depth - 1);
+					if (newScore > score) {
+						bestMove = m;
+						score = newScore;
+					}
+				}
+			}
+		} else {
+			score = 500;
+			for (Move m : allValidMoves()) {
+				if (depth == 0) {
+					double newScore = getBoardAfterMove(m).getQuickEvaluation();
+					if (newScore < score) {
+						bestMove = m;
+						score = newScore;
+					}
+				} else {
+					double newScore = getBoardAfterMove(m)
+							.getUnweightedEvaluation(depth - 1);
+					if (newScore < score) {
+						bestMove = m;
+						score = newScore;
+					}
+				}
+			}
+		}
+		if (bestMove != null&&depth==1) {
+			System.out.println(bestMove.toString(this));
+		}
+		return score;
+
+	}
+
+	public double getQuickEvaluation() {
+		if (gameInProgress == -1) {
+			return -500;
+		} else if (gameInProgress == 0) {
+			return 0;
+		} else if (gameInProgress == 1) {
+			return 500;
+		} else {
+			double score = 0;
+			for (Piece p : getPieces(WHITE)) {
+				switch (p.getType()) {
+				case QUEEN:
+					score += 9;
+					for (Square s : legalMoveSquaresWithoutCheck(p)) {
+						score += 0.002 * s.getEvaluationValue(WHITE);
+					}
+				case ROOK:
+					score += 5;
+					for (Square s : legalMoveSquaresWithoutCheck(p)) {
+						score += 0.005 * s.getEvaluationValue(WHITE);
+					}
+				case BISHOP:
+					score += 3.25;
+					for (Square s : legalMoveSquaresWithoutCheck(p)) {
+						score += 0.01 * s.getEvaluationValue(WHITE);
+					}
+				case KNIGHT:
+					score += 3;
+					for (Square s : legalMoveSquaresWithoutCheck(p)) {
+						score += 0.02 * s.getEvaluationValue(WHITE);
+					}
+				case PAWN:
+					score += 1;
+					for (Square s : legalMoveSquaresWithoutCheck(p)) {
+						score += 0.05 * s.getEvaluationValue(WHITE);
+					}
+				}
+			}
+			for (Piece p : getPieces(BLACK)) {
+				switch (p.getType()) {
+				case QUEEN:
+					score -= 9;
+					for (Square s : legalMoveSquaresWithoutCheck(p)) {
+						score -= 0.001 * s.getEvaluationValue(BLACK);
+					}
+				case ROOK:
+					score -= 5;
+					for (Square s : legalMoveSquaresWithoutCheck(p)) {
+						score -= 0.002 * s.getEvaluationValue(BLACK);
+					}
+				case BISHOP:
+					score -= 3.25;
+					for (Square s : legalMoveSquaresWithoutCheck(p)) {
+						score -= 0.005 * s.getEvaluationValue(BLACK);
+					}
+				case KNIGHT:
+					score -= 3;
+					for (Square s : legalMoveSquaresWithoutCheck(p)) {
+						score -= 0.01 * s.getEvaluationValue(BLACK);
+					}
+				case PAWN:
+					score -= 1;
+					for (Square s : legalMoveSquaresWithoutCheck(p)) {
+						score -= 0.025 * s.getEvaluationValue(BLACK);
+					}
+				}
+			}
+			
+			return score;
+		}
 	}
 }
