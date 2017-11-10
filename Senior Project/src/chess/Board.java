@@ -24,6 +24,7 @@ public class Board {
 	private boolean canBlackCastleQueenside;
 	private boolean turn;
 	private int gameInProgress;
+	private boolean realBoard;
 
 	public Board() {
 		// Set up board squares with pieces in starting position.
@@ -79,6 +80,7 @@ public class Board {
 		canBlackCastleQueenside = true;
 		turn = WHITE;
 		gameInProgress = 2;
+		realBoard = true;
 	}
 
 	public Board(Square[][] bs, Square ksw, Square ksb, int epf, boolean cwck,
@@ -102,6 +104,7 @@ public class Board {
 		canBlackCastleQueenside = cbcq;
 		turn = t;
 		gameInProgress = gip;
+		realBoard = false;
 	}
 
 	/**
@@ -165,14 +168,20 @@ public class Board {
 		if (allValidMoves(color).size() == 0) {
 			if (isInCheck(color)) {
 				if (color) {
-					System.out.println("Black wins by Checkmate!");
+					if (realBoard) {
+						System.out.println("Black wins by Checkmate!");
+					}
 					gameInProgress = -1;
 				} else {
-					System.out.println("White wins by Checkmate!");
+					if (realBoard) {
+						System.out.println("White wins by Checkmate!");
+					}
 					gameInProgress = 1;
 				}
 			} else {
-				System.out.println("Draw by Stalemate!");
+				if (realBoard) {
+					System.out.println("Draw by Stalemate!");
+				}
 				gameInProgress = 0;
 			}
 
@@ -453,7 +462,8 @@ public class Board {
 	public Board getBoardAfterMove(Move m) {
 		Board b = new Board(boardSquares, kingSquareWhite, kingSquareBlack,
 				enPessantFile, canWhiteCastleKingside, canBlackCastleKingside,
-				canWhiteCastleQueenside, canBlackCastleQueenside, turn, gameInProgress);
+				canWhiteCastleQueenside, canBlackCastleQueenside, turn,
+				gameInProgress);
 		b.makeMove(b.convertString(m.toString(this)));
 		return b;
 	}
@@ -677,12 +687,10 @@ public class Board {
 
 			} else {
 				System.out.println("Invalid Move!");
-				System.exit(1);
 			}
 		} else {
-			System.out.println("Wrong Turn!");
 		}
-		//Main.printBoard(this);
+		// Main.printBoard(this);
 
 	}
 
@@ -810,7 +818,6 @@ public class Board {
 
 			if (p.getType() == 0) {
 				System.out.println("Syntax Error");
-				System.exit(1);
 			}
 
 		}
@@ -867,7 +874,7 @@ public class Board {
 				}
 			}
 		}
-		if (bestMove != null&&depth==1) {
+		if (bestMove != null && depth == 1) {
 			System.out.println(bestMove.toString(this));
 		}
 		return score;
@@ -888,27 +895,27 @@ public class Board {
 				case QUEEN:
 					score += 9;
 					for (Square s : legalMoveSquaresWithoutCheck(p)) {
-						score += 0.002 * s.getEvaluationValue(WHITE);
+						score += 0.001 * s.getEvaluationValue(WHITE);
 					}
 				case ROOK:
 					score += 5;
 					for (Square s : legalMoveSquaresWithoutCheck(p)) {
-						score += 0.005 * s.getEvaluationValue(WHITE);
+						score += 0.002 * s.getEvaluationValue(WHITE);
 					}
 				case BISHOP:
 					score += 3.25;
 					for (Square s : legalMoveSquaresWithoutCheck(p)) {
-						score += 0.01 * s.getEvaluationValue(WHITE);
+						score += 0.005 * s.getEvaluationValue(WHITE);
 					}
 				case KNIGHT:
 					score += 3;
 					for (Square s : legalMoveSquaresWithoutCheck(p)) {
-						score += 0.02 * s.getEvaluationValue(WHITE);
+						score += 0.01 * s.getEvaluationValue(WHITE);
 					}
 				case PAWN:
 					score += 1;
 					for (Square s : legalMoveSquaresWithoutCheck(p)) {
-						score += 0.05 * s.getEvaluationValue(WHITE);
+						score += 0.025 * s.getEvaluationValue(WHITE);
 					}
 				}
 			}
@@ -941,7 +948,7 @@ public class Board {
 					}
 				}
 			}
-			
+
 			return score;
 		}
 	}
