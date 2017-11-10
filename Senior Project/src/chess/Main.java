@@ -33,10 +33,15 @@ public class Main {
 		b = new Board();
 		Scanner sc = new Scanner(System.in);
 		while(b.checkProgress()==2){
-			System.out.println("Make Move");
-			readCommand(sc.nextLine(), b);
-			System.out.println(b.getUnweightedEvaluation(1));
+			//System.out.println("Make Move");
+			long startTime = System.currentTimeMillis();
+			DoubleMove dm = b.getUnweightedEvaluation(1);
+			readCommand(dm.getMove().toString(b), b);
+			System.out.println(dm.getDouble());
+			System.out.println(dm.getMove().toString(b));
 			printBoard(b);
+			long endTime = System.currentTimeMillis();
+			System.out.println((endTime - startTime) + " milliseconds");
 		}
 	}
 

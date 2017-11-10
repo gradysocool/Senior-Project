@@ -154,7 +154,14 @@ public class Board {
 		ArrayList<Move> ary = new ArrayList<Move>();
 		for (Piece p : getPieces(color)) {
 			for (Square s : legalMoveSquares(p)) {
-				ary.add(new Move(p, s));
+				if(p.getType()==PAWN&&s.getRank()==8){
+					ary.add(new Move(p, s, 2));
+					ary.add(new Move(p, s, 3));
+					ary.add(new Move(p, s, 4));
+					ary.add(new Move(p, s, 5));
+				} else{
+					ary.add(new Move(p, s));
+				}
 			}
 		}
 		return ary;
@@ -833,7 +840,7 @@ public class Board {
 		return gameInProgress;
 	}
 
-	public double getUnweightedEvaluation(int depth) {
+	public DoubleMove getUnweightedEvaluation(int depth) {
 		Move bestMove = null;
 		double score;
 
@@ -842,14 +849,14 @@ public class Board {
 			for (Move m : allValidMoves()) {
 				if (depth == 0) {
 					double newScore = getBoardAfterMove(m).getQuickEvaluation();
-					if (newScore > score) {
+					if (newScore >= score) {
 						bestMove = m;
 						score = newScore;
 					}
 				} else {
 					double newScore = getBoardAfterMove(m)
-							.getUnweightedEvaluation(depth - 1);
-					if (newScore > score) {
+							.getUnweightedEvaluation(depth - 1).getDouble();
+					if (newScore >= score) {
 						bestMove = m;
 						score = newScore;
 					}
@@ -860,24 +867,21 @@ public class Board {
 			for (Move m : allValidMoves()) {
 				if (depth == 0) {
 					double newScore = getBoardAfterMove(m).getQuickEvaluation();
-					if (newScore < score) {
+					if (newScore <= score) {
 						bestMove = m;
 						score = newScore;
 					}
 				} else {
 					double newScore = getBoardAfterMove(m)
-							.getUnweightedEvaluation(depth - 1);
-					if (newScore < score) {
+							.getUnweightedEvaluation(depth - 1).getDouble();
+					if (newScore <= score) {
 						bestMove = m;
 						score = newScore;
 					}
 				}
 			}
 		}
-		if (bestMove != null && depth == 1) {
-			System.out.println(bestMove.toString(this));
-		}
-		return score;
+		return new DoubleMove(score, bestMove);
 
 	}
 
@@ -890,62 +894,78 @@ public class Board {
 			return 500;
 		} else {
 			double score = 0;
+			int rookFile = 0;
+			int rookRank = 0;
+			int pieces = getPieces(WHITE).size()+getPieces(BLACK).size();
+			boolean rookFound = false;
 			for (Piece p : getPieces(WHITE)) {
+				Square s = p.getSquare();
 				switch (p.getType()) {
+				case KING:
+					score -= (0.03*pieces-0.3)*s.getEvaluationValue(WHITE);
 				case QUEEN:
 					score += 9;
-					for (Square s : legalMoveSquaresWithoutCheck(p)) {
-						score += 0.001 * s.getEvaluationValue(WHITE);
-					}
+					score += 0.002 * s.getEvaluationValue(WHITE);
 				case ROOK:
 					score += 5;
-					for (Square s : legalMoveSquaresWithoutCheck(p)) {
-						score += 0.002 * s.getEvaluationValue(WHITE);
+					if(rookFound){
+						score += 0.005 * s.getEvaluationValue(WHITE);
+						if(p.getSquare().getFile()==rookFile||p.getSquare().getRank()==rookRank){
+							if(checkSquaresBetween(p.getSquare(),boardSquares[rookFile-1][rookRank-1])){
+								score += 0.5;
+							}
+						}
+					}
+					else{
+						rookFound = true;
+						rookFile = p.getSquare().getFile();
+						rookRank = p.getSquare().getRank();
 					}
 				case BISHOP:
 					score += 3.25;
-					for (Square s : legalMoveSquaresWithoutCheck(p)) {
-						score += 0.005 * s.getEvaluationValue(WHITE);
-					}
+					score += 0.01 * s.getEvaluationValue(WHITE);
 				case KNIGHT:
 					score += 3;
-					for (Square s : legalMoveSquaresWithoutCheck(p)) {
-						score += 0.01 * s.getEvaluationValue(WHITE);
-					}
+					score += 0.02 * s.getEvaluationValue(WHITE);
 				case PAWN:
 					score += 1;
-					for (Square s : legalMoveSquaresWithoutCheck(p)) {
-						score += 0.025 * s.getEvaluationValue(WHITE);
-					}
+					score += 0.2 * s.getEvaluationValue(WHITE);
 				}
 			}
+			rookFile = 0;
+			rookRank = 0;
 			for (Piece p : getPieces(BLACK)) {
+				Square s = p.getSquare();
 				switch (p.getType()) {
+				case KING:
+						score += (0.03*pieces-0.3)*s.getEvaluationValue(BLACK);
 				case QUEEN:
 					score -= 9;
-					for (Square s : legalMoveSquaresWithoutCheck(p)) {
-						score -= 0.001 * s.getEvaluationValue(BLACK);
-					}
+					score -= 0.002 * s.getEvaluationValue(BLACK);
 				case ROOK:
 					score -= 5;
-					for (Square s : legalMoveSquaresWithoutCheck(p)) {
-						score -= 0.002 * s.getEvaluationValue(BLACK);
+					if(rookFound){
+						score -= 0.005 * s.getEvaluationValue(BLACK);
+						if(p.getSquare().getFile()==rookFile||p.getSquare().getRank()==rookRank){
+							if(checkSquaresBetween(p.getSquare(),boardSquares[rookFile-1][rookRank-1])){
+								score -= 0.5;
+							}
+						}
+					}
+					else{
+						rookFound = true;
+						rookFile = p.getSquare().getFile();
+						rookRank = p.getSquare().getRank();
 					}
 				case BISHOP:
 					score -= 3.25;
-					for (Square s : legalMoveSquaresWithoutCheck(p)) {
-						score -= 0.005 * s.getEvaluationValue(BLACK);
-					}
+					score -= 0.01 * s.getEvaluationValue(BLACK);
 				case KNIGHT:
 					score -= 3;
-					for (Square s : legalMoveSquaresWithoutCheck(p)) {
-						score -= 0.01 * s.getEvaluationValue(BLACK);
-					}
+					score -= 0.02 * s.getEvaluationValue(BLACK);
 				case PAWN:
 					score -= 1;
-					for (Square s : legalMoveSquaresWithoutCheck(p)) {
-						score -= 0.025 * s.getEvaluationValue(BLACK);
-					}
+					score -= 0.2 * s.getEvaluationValue(BLACK);
 				}
 			}
 
