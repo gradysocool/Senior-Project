@@ -11,37 +11,67 @@ public class Main {
 	private static Board b;
 
 	public static void main(String[] args) {
-//		long startTime = System.currentTimeMillis();
-//		int counter=0;
-//		ArrayList<ArrayList<String>> ary = readPGN("");
-//		for (int i = 0; i < ary.size(); i++) {
-//
-//			b = new Board();
+		// long startTime = System.currentTimeMillis();
+		// int counter=0;
+		// ArrayList<ArrayList<String>> ary = readPGN("");
+		// for (int i = 0; i < ary.size(); i++) {
+		//
+		// b = new Board();
 
-//			for (int j = 0; j < ary.get(i).size(); j++) {
-//				System.out.print("Game: " + i);
-//				System.out.println("Make move");
-//				System.out.println(ary.get(i).get(j));
-//				readCommand(ary.get(i).get(j), b);
-//				System.out.println(b.getUnweightedEvaluation(1));
-//				counter++;
-//			}
-//		}
-//		long endTime = System.currentTimeMillis();
-//		System.out.println(counter + " moves");
-//		System.out.println((endTime - startTime) + " milliseconds");
+		// for (int j = 0; j < ary.get(i).size(); j++) {
+		// System.out.print("Game: " + i);
+		// System.out.println("Make move");
+		// System.out.println(ary.get(i).get(j));
+		// readCommand(ary.get(i).get(j), b);
+		// System.out.println(b.getUnweightedEvaluation(1));
+		// counter++;
+		// }
+		// }
+		// long endTime = System.currentTimeMillis();
+		// System.out.println(counter + " moves");
+		// System.out.println((endTime - startTime) + " milliseconds");
 		b = new Board();
+		System.out.println("How Many Players? <0>,<1>,<2>");
 		Scanner sc = new Scanner(System.in);
-		while(b.checkProgress()==2){
-			//System.out.println("Make Move");
-			long startTime = System.currentTimeMillis();
-			DoubleMove dm = b.getUnweightedEvaluation(1);
-			readCommand(dm.getMove().toString(b), b);
-			System.out.println(dm.getDouble());
-			System.out.println(dm.getMove().toString(b));
-			printBoard(b);
-			long endTime = System.currentTimeMillis();
-			System.out.println((endTime - startTime) + " milliseconds");
+		switch (sc.nextLine()) {
+		case "0":
+			while (b.checkProgress() == 2) {
+				// System.out.println("Make Move");
+				long startTime = System.currentTimeMillis();
+				DoubleMove dm = b.getUnweightedEvaluation(2);
+				readCommand(dm.getMove().toString(b), b);
+				System.out.println(dm.getDouble());
+				System.out.println(dm.getMove().toString(b));
+				printBoard(b);
+				long endTime = System.currentTimeMillis();
+				System.out.println((endTime - startTime) + " milliseconds");
+			}
+			break;
+		case "1":
+			while (b.checkProgress() == 2) {
+				System.out.println("Make Move");
+				readCommand(sc.nextLine(), b);
+				printBoard(b);
+				long startTime = System.currentTimeMillis();
+				DoubleMove dm = b.getUnweightedEvaluation(2);
+				readCommand(dm.getMove().toString(b), b);
+				System.out.println(dm.getDouble());
+				System.out.println(dm.getMove().toString(b));
+				printBoard(b);
+				long endTime = System.currentTimeMillis();
+				System.out.println((endTime - startTime) + " milliseconds");
+			}
+			break;
+
+		case "2":
+			while (b.checkProgress() == 2) {
+				System.out.println("Make Move");
+				readCommand(sc.nextLine(), b);
+				printBoard(b);
+			}
+			break;
+		default:
+			System.out.println("Closing Program");
 		}
 	}
 
@@ -64,7 +94,7 @@ public class Main {
 			System.out.println(s.toString());
 		}
 		System.out.println("Is Legal?");
-		System.out.println(b.isValidMove(m));
+		System.out.println(b.isLegalMove(m));
 		System.out.println("End Piece Description:");
 		System.out.println(s1.getPiece().getColor() + " "
 				+ s1.getPiece().getType());

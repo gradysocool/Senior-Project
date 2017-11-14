@@ -49,121 +49,149 @@ public class Piece {
 	}
 
 	public ArrayList<Square> availableMoveSquares(Board b) {
+
 		ArrayList<Square> ary = new ArrayList<Square>();
-		for (Square[] sq : b.getBoardSquares()) {
-			for (Square s : sq) {
-				switch (type) {
-				case EMPTY:
-					break;
-				case KING:
-					if (Math.abs(s.getFile() - square.getFile()) <= 1
-							&& Math.abs(s.getRank() - square.getRank()) <= 1) {
-						if (!s.equals(square)) {
-							ary.add(s);
-						}
+		int file = square.getFile();
+		int rank = square.getRank();
+		switch (type) {
+		case EMPTY:
+			break;
+		case KING:
+			for (int i = file - 1; i <= file + 1; i++) {
+				for (int j = rank - 1; j <= rank + 1; j++) {
+					if (i > 0 && i < 9 && j > 0 && j < 9
+							&& (i != file || j != rank)) {
+						ary.add(b.squareAt(i, j));
 					}
-					if (b.getCastleKingside(color)) {
-						if (s.getFile() == 7 && s.getRank() == square.getRank()) {
-							ary.add(s);
-						}
-					}
-					if (b.getCastleQueenside(color)) {
-						if (s.getFile() == 3 && s.getRank() == square.getRank()) {
-							ary.add(s);
-						}
-					}
-					break;
-				case QUEEN:
-					if (s.getFile() == square.getFile()
-							|| s.getRank() == square.getRank()
-							|| s.getFile() + s.getRank() == square.getFile()
-									+ square.getRank()
-							|| s.getFile() - s.getRank() == square.getFile()
-									- square.getRank()) {
-						if (!s.equals(square)) {
-							ary.add(s);
-						}
-					}
-					break;
-				case ROOK:
-					if (s.getFile() == square.getFile()
-							|| s.getRank() == square.getRank()) {
-						if (!s.equals(square)) {
-							ary.add(s);
-						}
-					}
-					break;
-				case BISHOP:
-					if (s.getFile() + s.getRank() == square.getFile()
-							+ square.getRank()
-							|| s.getFile() - s.getRank() == square.getFile()
-									- square.getRank()) {
-						if (!s.equals(square)) {
-							ary.add(s);
-						}
-					}
-					break;
-				case KNIGHT:
-					if (((Math.abs(s.getFile() - square.getFile()) == 2 && Math
-							.abs(s.getRank() - square.getRank()) == 1) || (Math
-							.abs(s.getFile() - square.getFile()) == 1 && Math
-							.abs(s.getRank() - square.getRank()) == 2))) {
-						if (!s.equals(square)) {
-							ary.add(s);
-						}
-					}
-					break;
-				case PAWN:
-					if (color == WHITE) {
-
-						if (s.getFile() == square.getFile() && s.getRank() == 4
-								&& square.getRank() == 2
-								&& s.getPiece().getType() == EMPTY) {
-							ary.add(s);
-						}
-						if (s.getRank() - square.getRank() == 1) {
-							if (s.getFile() == square.getFile()
-									&& s.getPiece().getType() == EMPTY) {
-								ary.add(s);
-							}
-							if (Math.abs(s.getFile() - square.getFile()) == 1) {
-								if (s.getPiece().getColor() != color
-										&& s.getPiece().getType() != EMPTY) {
-									ary.add(s);
-								}
-								if (b.getEnPessantFile() == s.getFile()&&square.getRank()==5) {
-									ary.add(s);
-								}
-							}
-						}
-					} else {
-						if (s.getFile() == square.getFile() && s.getRank() == 5
-								&& square.getRank() == 7
-								&& s.getPiece().getType() == EMPTY) {
-							ary.add(s);
-						}
-						if (s.getRank() - square.getRank() == -1) {
-							if (s.getFile() == square.getFile()
-									&& s.getPiece().getType() == EMPTY) {
-								ary.add(s);
-							}
-							if (Math.abs(s.getFile() - square.getFile()) == 1) {
-								if (s.getPiece().getColor() != color
-										&& s.getPiece().getType() != EMPTY) {
-									ary.add(s);
-								}
-								if (b.getEnPessantFile() == s.getFile()&&square.getRank()==4) {
-									ary.add(s);
-								}
-							}
-						}
-					}
-					break;
 				}
-
 			}
+			if (b.getCastleKingside(color)) {
+				ary.add(b.squareAt(7, 8));
+			}
+			if (b.getCastleQueenside(color)) {
+				ary.add(b.squareAt(3, 8));
+			}
+			break;
+		case QUEEN:
+			for (int i = 1; i <= 8; i++) {
+				if (i != file) {
+					ary.add(b.squareAt(i, rank));
+					if (rank + file - i > 0 && rank + file - i < 9) {
+						ary.add(b.squareAt(i, rank + file - i));
+					}
+					if (rank - file + i > 0 && rank - file + i < 9) {
+						ary.add(b.squareAt(i, rank - file + i));
+					}
+				}
+				if (i != rank) {
+					ary.add(b.squareAt(file, i));
+				}
+			}
+			break;
+		case ROOK:
+			for (int i = 1; i <= 8; i++) {
+				if (i != file) {
+					ary.add(b.squareAt(i, rank));
+				}
+				if (i != rank) {
+					ary.add(b.squareAt(file, i));
+				}
+			}
+			break;
+		case BISHOP:
+			for (int i = 1; i <= 8; i++) {
+				if (i != file) {
+					if (rank + file - i > 0 && rank + file - i < 9) {
+						ary.add(b.squareAt(i, rank + file - i));
+					}
+					if (rank - file + i > 0 && rank - file + i < 9) {
+						ary.add(b.squareAt(i, rank - file + i));
+					}
+				}
+			}
+			break;
+		case KNIGHT:
+			if(file-2>0&&rank+1<9){
+			ary.add(b.squareAt(file-2, rank+1));
+			}
+			if(file+2<9&&rank+1<9){
+			ary.add(b.squareAt(file+2, rank+1));
+			}
+			if(file-2>0&&rank-1>0){
+			ary.add(b.squareAt(file-2, rank-1));
+			}
+			if(file+2<9&&rank-1>0){
+			ary.add(b.squareAt(file+2, rank-1));
+			}
+			if(file-1>0&&rank+2<9){
+			ary.add(b.squareAt(file-1, rank+2));
+			}
+			if(file+1<9&&rank+2<9){
+			ary.add(b.squareAt(file+1, rank+2));
+			}
+			if(file-1>0&&rank-2>0){
+			ary.add(b.squareAt(file-1, rank-2));
+			}
+			if(file+1<9&&rank-2>0){
+			ary.add(b.squareAt(file+1, rank-2));
+			}
+			break;
+		case PAWN:
+			if (color == WHITE) {
+				if (rank == 2
+						&& b.squareAt(file, 4).getPiece().getType() == EMPTY) {
+					ary.add(b.squareAt(file, 4));
+				}
+				if (b.squareAt(file, rank + 1).getPiece().getType() == EMPTY) {
+					ary.add(b.squareAt(file, rank + 1));
+				}
+				if (file != 1) {
+					if (b.squareAt(file - 1, rank + 1).getPiece().getColor() != color
+							&& b.squareAt(file - 1, rank + 1).getPiece()
+									.getType() != EMPTY) {
+						ary.add(b.squareAt(file - 1, rank + 1));
+					} else if (b.getEnPessantFile() == file - 1 && rank == 5) {
+						ary.add(b.squareAt(file - 1, rank + 1));
+					}
+				}
+				if (file != 8) {
+					if (b.squareAt(file + 1, rank + 1).getPiece().getColor() != color
+							&& b.squareAt(file + 1, rank + 1).getPiece()
+									.getType() != EMPTY) {
+						ary.add(b.squareAt(file + 1, rank + 1));
+					} else if (b.getEnPessantFile() == file + 1 && rank == 5) {
+						ary.add(b.squareAt(file + 1, rank + 1));
+					}
+				}
+			} else {
+				if (rank == 7
+						&& b.squareAt(file, 5).getPiece().getType() == EMPTY) {
+					ary.add(b.squareAt(file, 5));
+				}
+				if (b.squareAt(file, rank - 1).getPiece().getType() == EMPTY) {
+					ary.add(b.squareAt(file, rank - 1));
+				}
+				if (file != 1) {
+					if (b.squareAt(file - 1, rank - 1).getPiece().getColor() != color
+							&& b.squareAt(file - 1, rank - 1).getPiece()
+									.getType() != EMPTY) {
+						ary.add(b.squareAt(file - 1, rank - 1));
+					} else if (b.getEnPessantFile() == file - 1 && rank == 4) {
+						ary.add(b.squareAt(file - 1, rank - 1));
+					}
+				}
+				if (file != 8) {
+					if (b.squareAt(file + 1, rank - 1).getPiece().getColor() != color
+							&& b.squareAt(file + 1, rank - 1).getPiece()
+									.getType() != EMPTY) {
+						ary.add(b.squareAt(file + 1, rank - 1));
+					} else if (b.getEnPessantFile() == file + 1 && rank == 4) {
+						ary.add(b.squareAt(file + 1, rank - 1));
+					}
+				}
+			}
+			break;
 		}
 		return ary;
 	}
-
 }

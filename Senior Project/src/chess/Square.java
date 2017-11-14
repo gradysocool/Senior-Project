@@ -36,6 +36,9 @@ public class Square {
 		s += rank;
 		return s;
 	}
+	public boolean sameSquare(Square s){
+		return file==s.getFile()&&rank==s.getRank();
+	}
 	public int getFile(){
 		return file;
 	}
