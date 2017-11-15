@@ -35,10 +35,15 @@ public class Main {
 		Scanner sc = new Scanner(System.in);
 		switch (sc.nextLine()) {
 		case "0":
-			while (b.checkProgress() == 2) {
+			while (true) {
 				// System.out.println("Make Move");
 				long startTime = System.currentTimeMillis();
-				DoubleMove dm = b.getUnweightedEvaluation(2);
+				DoubleMove dm = b.getUnweightedEvaluation(3);
+				b.checkEndConditions(b.getTurn());
+				System.out.println(b.checkProgress());
+				if(b.checkProgress()!=2){
+					break;
+				}
 				readCommand(dm.getMove().toString(b), b);
 				System.out.println(dm.getDouble());
 				System.out.println(dm.getMove().toString(b));
@@ -48,12 +53,22 @@ public class Main {
 			}
 			break;
 		case "1":
-			while (b.checkProgress() == 2) {
+			while (true) {
 				System.out.println("Make Move");
+				b.checkEndConditions(b.getTurn());
+				System.out.println(b.checkProgress());
+				if(b.checkProgress()!=2){
+					break;
+				}
 				readCommand(sc.nextLine(), b);
 				printBoard(b);
 				long startTime = System.currentTimeMillis();
-				DoubleMove dm = b.getUnweightedEvaluation(2);
+				DoubleMove dm = b.getUnweightedEvaluation(3);
+				b.checkEndConditions(b.getTurn());
+				System.out.println(b.checkProgress());
+				if(b.checkProgress()!=2){
+					break;
+				}
 				readCommand(dm.getMove().toString(b), b);
 				System.out.println(dm.getDouble());
 				System.out.println(dm.getMove().toString(b));
@@ -64,8 +79,13 @@ public class Main {
 			break;
 
 		case "2":
-			while (b.checkProgress() == 2) {
+			while (true) {
 				System.out.println("Make Move");
+				b.checkEndConditions(b.getTurn());
+				System.out.println(b.checkProgress());
+				if(b.checkProgress()!=2){
+					break;
+				}
 				readCommand(sc.nextLine(), b);
 				printBoard(b);
 			}

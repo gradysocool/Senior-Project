@@ -89,11 +89,10 @@ public class Board {
 		boardSquares = new Square[8][8];
 		for (int i = 1; i <= 8; i++) {
 			for (int j = 1; j <= 8; j++) {
-				Square s = bs[i - 1][j - 1];
+				Piece op = bs[i - 1][j - 1].getPiece();
 				boardSquares[i - 1][j - 1] = new Square(i, j);
-				Piece p = new Piece(s.getPiece().getColor(), s.getPiece()
-						.getType(), boardSquares[i - 1][j - 1]);
-				boardSquares[i - 1][j - 1].changePiece(p);
+				boardSquares[i - 1][j - 1].changePiece(new Piece(op.getColor(),
+						op.getType(), boardSquares[i - 1][j - 1]));
 
 			}
 		}
@@ -140,8 +139,8 @@ public class Board {
 	public boolean isLegalWithoutCheck(Move m) {
 		Piece p = m.getPiece();
 		Square finish = m.getMoveSquare();
-		for(Square s: p.availableMoveSquares(this)){
-			if(s.sameSquare(finish)){
+		for (Square s : p.availableMoveSquares(this)) {
+			if (s.sameSquare(finish)) {
 				switch (p.getType()) {
 
 				case EMPTY:
@@ -151,22 +150,24 @@ public class Board {
 					if (s.getFile() == 3 && p.getSquare().getFile() == 5) {
 						if (boardSquares[1][p.getColor() ? 0 : 7].getPiece()
 								.getType() == EMPTY
-								&& boardSquares[2][p.getColor() ? 0 : 7].getPiece()
-										.getType() == EMPTY
-								&& boardSquares[3][p.getColor() ? 0 : 7].getPiece()
-										.getType() == EMPTY) {
+								&& boardSquares[2][p.getColor() ? 0 : 7]
+										.getPiece().getType() == EMPTY
+								&& boardSquares[3][p.getColor() ? 0 : 7]
+										.getPiece().getType() == EMPTY) {
 							if (!isInCheck(p.getColor())) {
 								// Move the king over one square to test check.
 								p.getSquare().changePiece(
 										new Piece(true, EMPTY, p.getSquare()));
 								boardSquares[3][p.getColor() ? 0 : 7]
 										.changePiece(p);
-								p.changeSquare(boardSquares[3][p.getColor() ? 0 : 7]);
+								p.changeSquare(boardSquares[3][p.getColor() ? 0
+										: 7]);
 								if (!isInCheck(p.getColor())) {
 									// Move the king over another square to test
 									// check.
 									p.getSquare().changePiece(
-											new Piece(true, EMPTY, p.getSquare()));
+											new Piece(true, EMPTY, p
+													.getSquare()));
 									boardSquares[2][p.getColor() ? 0 : 7]
 											.changePiece(p);
 									p.changeSquare(boardSquares[2][p.getColor() ? 0
@@ -182,7 +183,8 @@ public class Board {
 										new Piece(true, EMPTY, p.getSquare()));
 								boardSquares[4][p.getColor() ? 0 : 7]
 										.changePiece(p);
-								p.changeSquare(boardSquares[4][p.getColor() ? 0 : 7]);
+								p.changeSquare(boardSquares[4][p.getColor() ? 0
+										: 7]);
 							}
 						}
 
@@ -191,20 +193,22 @@ public class Board {
 					else if (s.getFile() == 7 && p.getSquare().getFile() == 5) {
 						if (boardSquares[5][p.getColor() ? 0 : 7].getPiece()
 								.getType() == EMPTY
-								&& boardSquares[6][p.getColor() ? 0 : 7].getPiece()
-										.getType() == EMPTY) {
+								&& boardSquares[6][p.getColor() ? 0 : 7]
+										.getPiece().getType() == EMPTY) {
 							if (!isInCheck(p.getColor())) {
 								// Move the king over one square to test check.
 								p.getSquare().changePiece(
 										new Piece(true, EMPTY, p.getSquare()));
 								boardSquares[5][p.getColor() ? 0 : 7]
 										.changePiece(p);
-								p.changeSquare(boardSquares[5][p.getColor() ? 0 : 7]);
+								p.changeSquare(boardSquares[5][p.getColor() ? 0
+										: 7]);
 								if (!isInCheck(p.getColor())) {
 									// Move the king over another square to test
 									// check.
 									p.getSquare().changePiece(
-											new Piece(true, EMPTY, p.getSquare()));
+											new Piece(true, EMPTY, p
+													.getSquare()));
 									boardSquares[6][p.getColor() ? 0 : 7]
 											.changePiece(p);
 									p.changeSquare(boardSquares[6][p.getColor() ? 0
@@ -220,7 +224,8 @@ public class Board {
 										new Piece(true, EMPTY, p.getSquare()));
 								boardSquares[4][p.getColor() ? 0 : 7]
 										.changePiece(p);
-								p.changeSquare(boardSquares[4][p.getColor() ? 0 : 7]);
+								p.changeSquare(boardSquares[4][p.getColor() ? 0
+										: 7]);
 							}
 						}
 					}
@@ -233,8 +238,10 @@ public class Board {
 					}
 					break;
 				default:
-					// For other pieces, check if there are empty squares in between
-					// and that the destination square is empty or the opponent's
+					// For other pieces, check if there are empty squares in
+					// between
+					// and that the destination square is empty or the
+					// opponent's
 					// piece.
 					if (checkSquaresBetween(p.getSquare(), s)) {
 						if (s.getPiece().getColor() != p.getColor()
@@ -246,7 +253,7 @@ public class Board {
 				}
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -472,12 +479,14 @@ public class Board {
 				// For other pieces, check if there are empty squares in between
 				// and that the destination square is empty or the opponent's
 				// piece.
+
 				if (checkSquaresBetween(p.getSquare(), s)) {
 					if (s.getPiece().getColor() != p.getColor()
 							|| s.getPiece().getType() == EMPTY) {
 						ary.add(s);
 					}
 				}
+
 				break;
 			}
 		}
@@ -544,13 +553,15 @@ public class Board {
 		ArrayList<Square> ary = new ArrayList<Square>();
 		ArrayList<Square> aMS = p.availableMoveSquares(this);
 		for (Square s : aMS) {
-			if (p.getType() != 1) {
+			if (p.getType() != KING) {
+				
 				if (checkSquaresBetween(p.getSquare(), s)) {
 					if (s.getPiece().getColor() != p.getColor()
 							|| s.getPiece().getType() == EMPTY) {
 						ary.add(s);
 					}
 				}
+
 			} else {
 				int distance = s.getFile() - p.getSquare().getFile();
 				if (distance == 0 || distance == -1 || distance == 1) {
@@ -563,7 +574,8 @@ public class Board {
 	}
 
 	public boolean checkSquaresBetween(Square a, Square b) {
-		if (a.sameSquare(b)) {
+		if (a.sameSquare(b)||a.getFile()-b.getFile()==1||a.getFile()-b.getFile()==-1
+				||a.getRank()-b.getRank()==1||a.getRank()-b.getRank()==-1) {
 			return true;
 		}
 		if (a.getFile() == b.getFile()) {
@@ -672,7 +684,6 @@ public class Board {
 								boardSquares[3][0].changePiece(rook);
 								boardSquares[4][0].changePiece(new Piece(WHITE,
 										EMPTY, p.getSquare()));
-								checkEndConditions(!color);
 
 							} else {
 								// Kingside Castle
@@ -685,7 +696,7 @@ public class Board {
 								boardSquares[5][0].changePiece(rook);
 								boardSquares[4][0].changePiece(new Piece(WHITE,
 										EMPTY, p.getSquare()));
-								checkEndConditions(!color);
+
 							}
 						} else {
 							// Continue normally
@@ -693,7 +704,7 @@ public class Board {
 									new Piece(WHITE, EMPTY, p.getSquare()));
 							finish.changePiece(p);
 							p.changeSquare(finish);
-							checkEndConditions(!color);
+
 						}
 						// Remove Castling ability.
 						canWhiteCastleKingside = false;
@@ -722,7 +733,7 @@ public class Board {
 									new Piece(WHITE, EMPTY, p.getSquare()));
 							finish.changePiece(new Piece(WHITE,
 									m.promoteType(), finish));
-							checkEndConditions(!color);
+
 						}
 						// Continue normally
 						else {
@@ -730,7 +741,7 @@ public class Board {
 									new Piece(WHITE, EMPTY, p.getSquare()));
 							finish.changePiece(p);
 							p.changeSquare(finish);
-							checkEndConditions(!color);
+
 						}
 						break;
 					case ROOK:
@@ -746,7 +757,7 @@ public class Board {
 								new Piece(WHITE, EMPTY, p.getSquare()));
 						finish.changePiece(p);
 						p.changeSquare(finish);
-						checkEndConditions(!color);
+
 						break;
 					default:
 						// Move or capture piece on the square moved to and
@@ -755,7 +766,7 @@ public class Board {
 								new Piece(WHITE, EMPTY, p.getSquare()));
 						finish.changePiece(p);
 						p.changeSquare(finish);
-						checkEndConditions(!color);
+
 						break;
 					}
 				}
@@ -776,7 +787,6 @@ public class Board {
 								boardSquares[3][7].changePiece(rook);
 								boardSquares[4][7].changePiece(new Piece(WHITE,
 										EMPTY, p.getSquare()));
-								checkEndConditions(!color);
 
 							} else {
 								// Kingside Castle
@@ -789,7 +799,7 @@ public class Board {
 								boardSquares[5][7].changePiece(rook);
 								boardSquares[4][7].changePiece(new Piece(WHITE,
 										EMPTY, p.getSquare()));
-								checkEndConditions(!color);
+
 							}
 						} else {
 							// Continue normally
@@ -797,7 +807,7 @@ public class Board {
 									new Piece(WHITE, EMPTY, p.getSquare()));
 							finish.changePiece(p);
 							p.changeSquare(finish);
-							checkEndConditions(!color);
+
 						}
 						// Remove Castling ability.
 						canBlackCastleKingside = false;
@@ -826,7 +836,7 @@ public class Board {
 									new Piece(WHITE, EMPTY, p.getSquare()));
 							finish.changePiece(new Piece(BLACK,
 									m.promoteType(), finish));
-							checkEndConditions(!color);
+
 						}
 						// Continue normally
 						else {
@@ -834,7 +844,7 @@ public class Board {
 									new Piece(WHITE, EMPTY, p.getSquare()));
 							finish.changePiece(p);
 							p.changeSquare(finish);
-							checkEndConditions(!color);
+
 						}
 						break;
 					case ROOK:
@@ -850,7 +860,7 @@ public class Board {
 								new Piece(WHITE, EMPTY, p.getSquare()));
 						finish.changePiece(p);
 						p.changeSquare(finish);
-						checkEndConditions(!color);
+
 						break;
 					default:
 						// Move or capture piece on the square moved to and
@@ -859,7 +869,7 @@ public class Board {
 								new Piece(WHITE, EMPTY, p.getSquare()));
 						finish.changePiece(p);
 						p.changeSquare(finish);
-						checkEndConditions(!color);
+
 						break;
 					}
 				}
@@ -876,6 +886,10 @@ public class Board {
 
 	public int getEnPessantFile() {
 		return enPessantFile;
+	}
+
+	public boolean getTurn() {
+		return turn;
 	}
 
 	public boolean getCastleKingside(boolean color) {
@@ -1020,47 +1034,114 @@ public class Board {
 	public int checkProgress() {
 		return gameInProgress;
 	}
-
+//	public DoubleMove getWeightedEvaluation(int depth, int boards){
+//		Move bestMove = null;
+//		double score;
+//		if(depth == 0){
+//			if (turn) {
+//				score = -500;
+//				ArrayList<Move> aVM = allValidMoves();
+//				if (aVM.size() != 0) {
+//					for (Move m : aVM) {
+//							double newScore = getBoardAfterMove(m)
+//									.getWeightedEvaluation(depth-1, boards).getDouble();
+//							if (newScore >= score) {
+//								bestMove = m;
+//								score = newScore;
+//							}
+//					}
+//				} else {
+//					if (isInCheck(turn)) {
+//						score = -500 - depth;
+//					} else {
+//						score = 0;
+//					}
+//				}
+//			} else {
+//				score = 500;
+//				ArrayList<Move> aVM = allValidMoves();
+//				if (aVM.size() != 0) {
+//					for (Move m : aVM) {
+//							double newScore = getBoardAfterMove(m)
+//									.getWeightedEvaluation(depth-1, boards).getDouble();
+//							if (newScore <= score) {
+//								bestMove = m;
+//								score = newScore;
+//							}
+//					}
+//				} else {
+//					if (isInCheck(turn)) {
+//						score = 500 + depth;
+//					} else {
+//						score = 0;
+//					}
+//				}
+//			}
+//		}else{
+//			if(boards==0){
+//				score = getQuickEvaluation();
+//			}
+//		}
+//		return new DoubleMove(score, bestMove);
+//	}
 	public DoubleMove getUnweightedEvaluation(int depth) {
 		Move bestMove = null;
 		double score;
 
 		if (turn) {
 			score = -500;
-			for (Move m : allValidMoves()) {
-				if (depth == 0) {
-					double newScore = getBoardAfterMove(m).getQuickEvaluation(
-							depth);
-					if (newScore >= score) {
-						bestMove = m;
-						score = newScore;
+			ArrayList<Move> aVM = allValidMoves();
+			if (aVM.size() != 0) {
+				for (Move m : aVM) {
+					if (depth == 0) {
+						double newScore = getBoardAfterMove(m)
+								.getQuickEvaluation(depth);
+						if (newScore >= score) {
+							bestMove = m;
+							score = newScore;
+						}
+					} else {
+						double newScore = getBoardAfterMove(m)
+								.getUnweightedEvaluation(depth - 1).getDouble();
+						if (newScore >= score) {
+							bestMove = m;
+							score = newScore;
+						}
 					}
+				}
+			} else {
+				if (isInCheck(turn)) {
+					score = -500 - depth;
 				} else {
-					double newScore = getBoardAfterMove(m)
-							.getUnweightedEvaluation(depth - 1).getDouble();
-					if (newScore >= score) {
-						bestMove = m;
-						score = newScore;
-					}
+					score = 0;
 				}
 			}
 		} else {
 			score = 500;
-			for (Move m : allValidMoves()) {
-				if (depth == 0) {
-					double newScore = getBoardAfterMove(m).getQuickEvaluation(
-							depth);
-					if (newScore <= score) {
-						bestMove = m;
-						score = newScore;
+			ArrayList<Move> aVM = allValidMoves();
+			if (aVM.size() != 0) {
+				for (Move m : aVM) {
+					if (depth == 0) {
+						double newScore = getBoardAfterMove(m)
+								.getQuickEvaluation(depth);
+						if (newScore <= score) {
+							bestMove = m;
+							score = newScore;
+						}
+					} else {
+						double newScore = getBoardAfterMove(m)
+								.getUnweightedEvaluation(depth - 1).getDouble();
+						if (newScore <= score) {
+							bestMove = m;
+							score = newScore;
+						}
 					}
+				}
+			} else {
+				if (isInCheck(turn)) {
+					score = 500 + depth;
 				} else {
-					double newScore = getBoardAfterMove(m)
-							.getUnweightedEvaluation(depth - 1).getDouble();
-					if (newScore <= score) {
-						bestMove = m;
-						score = newScore;
-					}
+					score = 0;
 				}
 			}
 		}
@@ -1070,11 +1151,11 @@ public class Board {
 
 	public double getQuickEvaluation(int depth) {
 		if (gameInProgress == -1) {
-			return -500 - depth;
+			return -500;
 		} else if (gameInProgress == 0) {
 			return 0;
 		} else if (gameInProgress == 1) {
-			return 500 + depth;
+			return 500;
 		} else {
 			double score = 0;
 			int rookFile = 0;

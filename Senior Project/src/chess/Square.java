@@ -46,7 +46,7 @@ public class Square {
 		return rank;
 	}
 	public double getEvaluationValue(boolean color){
-		double score = 0.25;
+		double score = 0.15;
 		score *= 4.5-Math.abs(4.5-getFile());
 		if(color){
 		score *= getRank()/4.0;
