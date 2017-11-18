@@ -59,6 +59,7 @@ public class Move {
 			if (p.getSquare().getFile() != finish.getFile()) {
 				s = s + (char) (p.getSquare().getFile() + 'a' - 1);
 			}
+			break;
 		}
 		for(Piece op :b.getPieces(p.getColor())){
 			if(op.getType()==p.getType()&&!op.equals(p)&&p.getType()!=6){

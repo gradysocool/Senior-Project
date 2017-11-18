@@ -16,4 +16,11 @@ public class DoubleMove {
 	public Move getMove() {
 		return m;
 	}
+	public String toString(Board b, int depth){
+		String s = "";
+		for(int i = 0; i<depth; i++){
+			s = s + "    ";
+		}
+		return s + m.toString(b) + " " + d;
+	}
 }

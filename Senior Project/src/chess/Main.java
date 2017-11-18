@@ -11,25 +11,25 @@ public class Main {
 	private static Board b;
 
 	public static void main(String[] args) {
-		// long startTime = System.currentTimeMillis();
-		// int counter=0;
-		// ArrayList<ArrayList<String>> ary = readPGN("");
-		// for (int i = 0; i < ary.size(); i++) {
-		//
-		// b = new Board();
-
-		// for (int j = 0; j < ary.get(i).size(); j++) {
-		// System.out.print("Game: " + i);
-		// System.out.println("Make move");
-		// System.out.println(ary.get(i).get(j));
-		// readCommand(ary.get(i).get(j), b);
-		// System.out.println(b.getUnweightedEvaluation(1));
-		// counter++;
-		// }
-		// }
-		// long endTime = System.currentTimeMillis();
-		// System.out.println(counter + " moves");
-		// System.out.println((endTime - startTime) + " milliseconds");
+//		long startTime = System.currentTimeMillis();
+//		int counter=0;
+//		ArrayList<ArrayList<String>> ary = readPGN("");
+//		for (int i = 0; i < ary.size(); i++) {
+//		
+//		b = new Board();
+//
+//		for (int j = 0; j < ary.get(i).size(); j++) {
+//		System.out.print("Game: " + i);
+//		System.out.println("Make move");
+//		System.out.println(ary.get(i).get(j));
+//		readCommand(ary.get(i).get(j), b);
+//		System.out.println(b.getUnweightedEvaluation(1));
+//		counter++;
+//		}
+//		}
+//		long endTime = System.currentTimeMillis();
+//		System.out.println(counter + " moves");
+//		System.out.println((endTime - startTime) + " milliseconds");
 		b = new Board();
 		System.out.println("How Many Players? <0>,<1>,<2>");
 		Scanner sc = new Scanner(System.in);
@@ -37,44 +37,42 @@ public class Main {
 		case "0":
 			while (true) {
 				// System.out.println("Make Move");
-				long startTime = System.currentTimeMillis();
-				DoubleMove dm = b.getUnweightedEvaluation(3);
+				//long startTime = System.currentTimeMillis();
+				DoubleMove dm = b.getEvaluation(2,0,10,50);
 				b.checkEndConditions(b.getTurn());
-				System.out.println(b.checkProgress());
 				if(b.checkProgress()!=2){
 					break;
 				}
-				readCommand(dm.getMove().toString(b), b);
-				System.out.println(dm.getDouble());
 				System.out.println(dm.getMove().toString(b));
+				readCommand(dm.getMove().toString(b), b);
+				//System.out.println(dm.getDouble());
 				printBoard(b);
-				long endTime = System.currentTimeMillis();
-				System.out.println((endTime - startTime) + " milliseconds");
+				//long endTime = System.currentTimeMillis();
+				//System.out.println((endTime - startTime) + " milliseconds");
 			}
 			break;
 		case "1":
 			while (true) {
+				//long startTime = System.currentTimeMillis();
+				DoubleMove dm = b.getEvaluation(2,0,10,50);
+				b.checkEndConditions(b.getTurn());
+				if(b.checkProgress()!=2){
+					break;
+				}
+				System.out.println(dm.getMove().toString(b));
+				readCommand(dm.getMove().toString(b), b);
+				//System.out.println(dm.getDouble());
+				printBoard(b);
+				//long endTime = System.currentTimeMillis();
+				//System.out.println((endTime - startTime) + " milliseconds");
 				System.out.println("Make Move");
 				b.checkEndConditions(b.getTurn());
-				System.out.println(b.checkProgress());
 				if(b.checkProgress()!=2){
 					break;
 				}
 				readCommand(sc.nextLine(), b);
 				printBoard(b);
-				long startTime = System.currentTimeMillis();
-				DoubleMove dm = b.getUnweightedEvaluation(3);
-				b.checkEndConditions(b.getTurn());
-				System.out.println(b.checkProgress());
-				if(b.checkProgress()!=2){
-					break;
-				}
-				readCommand(dm.getMove().toString(b), b);
-				System.out.println(dm.getDouble());
-				System.out.println(dm.getMove().toString(b));
-				printBoard(b);
-				long endTime = System.currentTimeMillis();
-				System.out.println((endTime - startTime) + " milliseconds");
+				
 			}
 			break;
 
@@ -82,12 +80,13 @@ public class Main {
 			while (true) {
 				System.out.println("Make Move");
 				b.checkEndConditions(b.getTurn());
-				System.out.println(b.checkProgress());
+				System.out.println(b.getEnPessantFile());
 				if(b.checkProgress()!=2){
 					break;
 				}
 				readCommand(sc.nextLine(), b);
 				printBoard(b);
+				
 			}
 			break;
 		default:

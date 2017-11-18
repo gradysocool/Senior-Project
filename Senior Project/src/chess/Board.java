@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Board {
 
@@ -120,15 +121,30 @@ public class Board {
 		for (Piece p : getPieces(!color)) {
 			// Check all available moves of the piece on this square
 			// disregarding check to other king.
-			for (Square t : checkableMoveSquares(p)) {
-				// If square is the same square as our king return true
-				if (color) {
-					if (t.sameSquare(kingSquareWhite)) {
-						return true;
+
+			// If square is the same square as our king return true
+			if (color) {
+				if (p.availableMoveSquares(this).contains(kingSquareWhite)) {
+					if (checkSquaresBetween(p.getSquare(), kingSquareWhite)) {
+						if (p.getType() != 1
+								|| (p.getSquare().getFile()
+										- kingSquareWhite.getFile() < 2 && p
+										.getSquare().getFile()
+										- kingSquareWhite.getFile() > -2)) {
+							return true;
+						}
 					}
-				} else {
-					if (t.sameSquare(kingSquareBlack)) {
-						return true;
+				}
+			} else {
+				if (p.availableMoveSquares(this).contains(kingSquareBlack)) {
+					if (checkSquaresBetween(p.getSquare(), kingSquareBlack)) {
+						if (p.getType() != 1
+								|| (p.getSquare().getFile()
+										- kingSquareBlack.getFile() < 2 && p
+										.getSquare().getFile()
+										- kingSquareBlack.getFile() > -2)) {
+							return true;
+						}
 					}
 				}
 			}
@@ -146,8 +162,10 @@ public class Board {
 				case EMPTY:
 					break;
 				case KING:
+					boolean isValid = false;
 					// Some more queenside castling checks.
 					if (s.getFile() == 3 && p.getSquare().getFile() == 5) {
+						
 						if (boardSquares[1][p.getColor() ? 0 : 7].getPiece()
 								.getType() == EMPTY
 								&& boardSquares[2][p.getColor() ? 0 : 7]
@@ -175,7 +193,7 @@ public class Board {
 									if (!isInCheck(p.getColor())) {
 										// Finally it has passed the necessary
 										// requirements.
-										return true;
+										isValid = true;
 									}
 								}
 								// Put king back.
@@ -185,6 +203,9 @@ public class Board {
 										.changePiece(p);
 								p.changeSquare(boardSquares[4][p.getColor() ? 0
 										: 7]);
+								if(isValid){
+									return true;
+								}
 							}
 						}
 
@@ -216,7 +237,7 @@ public class Board {
 									if (!isInCheck(p.getColor())) {
 										// Finally it has passed the necessary
 										// requirements.
-										return true;
+										isValid = true;
 									}
 								}
 								// Put king back.
@@ -226,6 +247,9 @@ public class Board {
 										.changePiece(p);
 								p.changeSquare(boardSquares[4][p.getColor() ? 0
 										: 7]);
+								if(isValid){
+									return true;
+								}
 							}
 						}
 					}
@@ -261,6 +285,7 @@ public class Board {
 		if (isLegalWithoutCheck(m)) {
 			Piece p = m.getPiece();
 			Square s = m.getMoveSquare();
+			boolean isLegal = false;
 			boolean enPessant = false;
 			if (p.getType() == PAWN && p.getSquare().getFile() != s.getFile()
 					&& s.getPiece().getType() == EMPTY) {
@@ -287,7 +312,7 @@ public class Board {
 				}
 			}
 			if (!isInCheck(currentSquarePrevious.getColor())) {
-				return true;
+				isLegal = true;
 			}
 			previousSquare.changePiece(currentSquarePrevious);
 			s.changePiece(otherSquarePrevious);
@@ -300,6 +325,9 @@ public class Board {
 					boardSquares[s.getFile() - 1][3].changePiece(new Piece(
 							WHITE, PAWN, boardSquares[s.getFile() - 1][3]));
 				}
+			}
+			if (isLegal) {
+				return true;
 			}
 			if (p.getType() == KING) {
 				if (p.getColor()) {
@@ -554,7 +582,7 @@ public class Board {
 		ArrayList<Square> aMS = p.availableMoveSquares(this);
 		for (Square s : aMS) {
 			if (p.getType() != KING) {
-				
+
 				if (checkSquaresBetween(p.getSquare(), s)) {
 					if (s.getPiece().getColor() != p.getColor()
 							|| s.getPiece().getType() == EMPTY) {
@@ -574,8 +602,10 @@ public class Board {
 	}
 
 	public boolean checkSquaresBetween(Square a, Square b) {
-		if (a.sameSquare(b)||a.getFile()-b.getFile()==1||a.getFile()-b.getFile()==-1
-				||a.getRank()-b.getRank()==1||a.getRank()-b.getRank()==-1) {
+		if (a.sameSquare(b) || a.getFile() - b.getFile() == 1
+				|| a.getFile() - b.getFile() == -1
+				|| a.getRank() - b.getRank() == 1
+				|| a.getRank() - b.getRank() == -1) {
 			return true;
 		}
 		if (a.getFile() == b.getFile()) {
@@ -723,8 +753,8 @@ public class Board {
 						}
 						// if the pawn moves forward 2, notify that it can be
 						// captured en Pessant.
-						else if (Math.abs(p.getSquare().getRank()
-								- finish.getRank()) == 2) {
+						else if (p.getSquare().getRank() - finish.getRank() == -2) {
+
 							enPessantFile = finish.getFile();
 						}
 						// pawn promotion
@@ -826,8 +856,7 @@ public class Board {
 						}
 						// if the pawn moves forward 2, notify that it can be
 						// captured en Pessant.
-						else if (Math.abs(p.getSquare().getRank()
-								- finish.getRank()) == 2) {
+						else if (p.getSquare().getRank() - finish.getRank() == 2) {
 							enPessantFile = finish.getFile();
 						}
 						// pawn promotion
@@ -1034,56 +1063,185 @@ public class Board {
 	public int checkProgress() {
 		return gameInProgress;
 	}
-//	public DoubleMove getWeightedEvaluation(int depth, int boards){
-//		Move bestMove = null;
-//		double score;
-//		if(depth == 0){
-//			if (turn) {
-//				score = -500;
-//				ArrayList<Move> aVM = allValidMoves();
-//				if (aVM.size() != 0) {
-//					for (Move m : aVM) {
-//							double newScore = getBoardAfterMove(m)
-//									.getWeightedEvaluation(depth-1, boards).getDouble();
-//							if (newScore >= score) {
-//								bestMove = m;
-//								score = newScore;
-//							}
-//					}
-//				} else {
-//					if (isInCheck(turn)) {
-//						score = -500 - depth;
-//					} else {
-//						score = 0;
-//					}
-//				}
-//			} else {
-//				score = 500;
-//				ArrayList<Move> aVM = allValidMoves();
-//				if (aVM.size() != 0) {
-//					for (Move m : aVM) {
-//							double newScore = getBoardAfterMove(m)
-//									.getWeightedEvaluation(depth-1, boards).getDouble();
-//							if (newScore <= score) {
-//								bestMove = m;
-//								score = newScore;
-//							}
-//					}
-//				} else {
-//					if (isInCheck(turn)) {
-//						score = 500 + depth;
-//					} else {
-//						score = 0;
-//					}
-//				}
-//			}
-//		}else{
-//			if(boards==0){
-//				score = getQuickEvaluation();
-//			}
-//		}
-//		return new DoubleMove(score, bestMove);
-//	}
+
+	public DoubleMove getEvaluation(int evalDepth, int depth, int boards,
+			int transferPercentage) {
+		Move bestMove = null;
+		double score = 0;
+		if (evalDepth == 1) {
+			if (turn) {
+				score = -500;
+				ArrayList<Move> aVM = allValidMoves();
+				if (aVM.size() != 0) {
+					for (Move m : aVM) {
+						double newScore = getBoardAfterMove(m)
+								.getWeightedEvaluation(depth + 1, boards,
+										transferPercentage).getDouble();
+						if (newScore >= score) {
+							bestMove = m;
+							score = newScore;
+						}
+					}
+				} else {
+					if (isInCheck(turn)) {
+						score = -500 - depth;
+					} else {
+						score = 0;
+					}
+				}
+			} else {
+				score = 500;
+				ArrayList<Move> aVM = allValidMoves();
+				if (aVM.size() != 0) {
+					for (Move m : aVM) {
+						double newScore = getBoardAfterMove(m)
+								.getWeightedEvaluation(depth + 1, boards,
+										transferPercentage).getDouble();
+						if (newScore <= score) {
+							bestMove = m;
+							score = newScore;
+						}
+					}
+				} else {
+					if (isInCheck(turn)) {
+						score = 500 + depth;
+					} else {
+						score = 0;
+					}
+				}
+			}
+		} else {
+			if (turn) {
+				score = -500;
+				ArrayList<Move> aVM = allValidMoves();
+				if (aVM.size() != 0) {
+					for (Move m : aVM) {
+						double newScore = getBoardAfterMove(m).getEvaluation(
+								evalDepth - 1, depth + 1, boards,
+								transferPercentage).getDouble();
+						
+						if (newScore >= score) {
+							bestMove = m;
+							score = newScore;
+						}
+					}
+				} else {
+					if (isInCheck(turn)) {
+						score = -500 - depth;
+					} else {
+						score = 0;
+					}
+				}
+			} else {
+				score = 500;
+				ArrayList<Move> aVM = allValidMoves();
+				if (aVM.size() != 0) {
+					for (Move m : aVM) {
+						double newScore = getBoardAfterMove(m).getEvaluation(
+								evalDepth - 1, depth + 1, boards,
+								transferPercentage).getDouble();
+						if (newScore <= score) {
+							bestMove = m;
+							score = newScore;
+						}
+					}
+				} else {
+					if (isInCheck(turn)) {
+						score = 500 + depth;
+					} else {
+						score = 0;
+					}
+				}
+			}
+		}
+		return new DoubleMove(score, bestMove);
+
+	}
+
+	public DoubleMove getWeightedEvaluation(int depth, int boards,
+			int transferPercentage) {
+		Move bestMove = null;
+		double score = 0;
+		if (boards > 1) {
+			if (turn) {
+				score = -500;
+				ArrayList<Move> aVM = allValidMoves();
+				if (aVM.size() != 0) {
+					ArrayList<DoubleMove> evals = new ArrayList<DoubleMove>();
+					for (Move m : aVM) {
+						DoubleMove eval = new DoubleMove(getBoardAfterMove(m)
+								.getQuickEvaluation(), m);
+						evals.add(eval);
+
+					}
+
+					Collections.sort(evals, new DoubleMoveComparatorWhite());
+
+					boards--;
+					for (int i = evals.size() - 1; boards > 0 && i >= 0; i--) {
+						int boardsUsed = (int) (boards
+								* transferPercentage / 100.0);
+						DoubleMove dm = evals.get(i);
+						evals.set(
+								i,
+								getBoardAfterMove(dm.getMove())
+										.getWeightedEvaluation(depth + 1,
+												boardsUsed, transferPercentage));
+						boards -= boardsUsed;
+					}
+					
+					Collections.sort(evals, new DoubleMoveComparatorWhite());
+						
+					return evals.get(evals.size() - 1);
+				} else {
+					if (isInCheck(turn)) {
+						score = -500 - depth;
+					} else {
+						score = 0;
+					}
+				}
+			} else {
+				score = 500;
+				ArrayList<Move> aVM = allValidMoves();
+				if (aVM.size() != 0) {
+					ArrayList<DoubleMove> evals = new ArrayList<DoubleMove>();
+					for (Move m : aVM) {
+						DoubleMove eval = new DoubleMove(getBoardAfterMove(m)
+								.getQuickEvaluation(), m);
+						evals.add(eval);
+
+					}
+					Collections.sort(evals, new DoubleMoveComparatorBlack());
+					boards--;
+					for (int i = evals.size() - 1; boards > 0 && i >= 0; i--) {
+						int boardsUsed = (int) (boards
+								* transferPercentage / 100.0);
+						DoubleMove dm = evals.get(i);
+						evals.set(
+								i,
+								getBoardAfterMove(dm.getMove())
+										.getWeightedEvaluation(depth + 1,
+												boardsUsed, transferPercentage));
+						boards -= boardsUsed;
+					}
+					Collections.sort(evals, new DoubleMoveComparatorBlack());
+					return evals.get(evals.size() - 1);
+				} else {
+					if (isInCheck(turn)) {
+						score = 500 + depth;
+					} else {
+						score = 0;
+					}
+				}
+			}
+		} else if (boards == 1) {
+			return getUnweightedEvaluation(0);
+		} else {
+			return new DoubleMove(getQuickEvaluation(), null);
+		}
+		return new DoubleMove(score, bestMove);
+	}
+
 	public DoubleMove getUnweightedEvaluation(int depth) {
 		Move bestMove = null;
 		double score;
@@ -1095,7 +1253,7 @@ public class Board {
 				for (Move m : aVM) {
 					if (depth == 0) {
 						double newScore = getBoardAfterMove(m)
-								.getQuickEvaluation(depth);
+								.getQuickEvaluation();
 						if (newScore >= score) {
 							bestMove = m;
 							score = newScore;
@@ -1123,7 +1281,7 @@ public class Board {
 				for (Move m : aVM) {
 					if (depth == 0) {
 						double newScore = getBoardAfterMove(m)
-								.getQuickEvaluation(depth);
+								.getQuickEvaluation();
 						if (newScore <= score) {
 							bestMove = m;
 							score = newScore;
@@ -1149,7 +1307,7 @@ public class Board {
 
 	}
 
-	public double getQuickEvaluation(int depth) {
+	public double getQuickEvaluation() {
 		if (gameInProgress == -1) {
 			return -500;
 		} else if (gameInProgress == 0) {
@@ -1166,11 +1324,11 @@ public class Board {
 				Square s = p.getSquare();
 				switch (p.getType()) {
 				case KING:
-					score -= (0.03 * pieces - 0.3)
+					score -= (0.05 * pieces - 0.5)
 							* s.getEvaluationValue(WHITE);
 				case QUEEN:
 					score += 9;
-					score += 0.002 * s.getEvaluationValue(WHITE);
+					score -= (0.012 * pieces - 0.2) * s.getEvaluationValue(WHITE);
 				case ROOK:
 					score += 5;
 					if (rookFound) {
@@ -1189,10 +1347,10 @@ public class Board {
 					}
 				case BISHOP:
 					score += 3.25;
-					score += 0.01 * s.getEvaluationValue(WHITE);
+					score += 0.025 * s.getEvaluationValue(WHITE);
 				case KNIGHT:
 					score += 3;
-					score += 0.02 * s.getEvaluationValue(WHITE);
+					score += 0.05 * s.getEvaluationValue(WHITE);
 				case PAWN:
 					score += 1;
 					score += 0.3 * s.getEvaluationValue(WHITE);
@@ -1204,11 +1362,11 @@ public class Board {
 				Square s = p.getSquare();
 				switch (p.getType()) {
 				case KING:
-					score += (0.03 * pieces - 0.3)
+					score += (0.05 * pieces - 0.5)
 							* s.getEvaluationValue(BLACK);
 				case QUEEN:
 					score -= 9;
-					score -= 0.002 * s.getEvaluationValue(BLACK);
+					score += (0.012 * pieces - 0.2) * s.getEvaluationValue(BLACK);
 				case ROOK:
 					score -= 5;
 					if (rookFound) {
@@ -1227,10 +1385,10 @@ public class Board {
 					}
 				case BISHOP:
 					score -= 3.25;
-					score -= 0.01 * s.getEvaluationValue(BLACK);
+					score -= 0.015 * s.getEvaluationValue(BLACK);
 				case KNIGHT:
 					score -= 3;
-					score -= 0.02 * s.getEvaluationValue(BLACK);
+					score -= 0.03 * s.getEvaluationValue(BLACK);
 				case PAWN:
 					score -= 1;
 					score -= 0.3 * s.getEvaluationValue(BLACK);

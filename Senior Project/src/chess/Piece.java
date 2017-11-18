@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class Piece {
 	public static final boolean WHITE = true;
@@ -47,7 +48,10 @@ public class Piece {
 	public void changeSquare(Square s) {
 		square = s;
 	}
-
+	public HashSet<Square> hashAvailableMoveSquares(Board b){
+		HashSet<Square> ary = new HashSet<Square>(availableMoveSquares(b));
+		return ary;
+	}
 	public ArrayList<Square> availableMoveSquares(Board b) {
 
 		ArrayList<Square> ary = new ArrayList<Square>();
@@ -66,10 +70,10 @@ public class Piece {
 				}
 			}
 			if (b.getCastleKingside(color)) {
-				ary.add(b.squareAt(7, 8));
+				ary.add(b.squareAt(7, color?1:8));
 			}
 			if (b.getCastleQueenside(color)) {
-				ary.add(b.squareAt(3, 8));
+				ary.add(b.squareAt(3, color?1:8));
 			}
 			break;
 		case QUEEN:
