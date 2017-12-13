@@ -1098,21 +1098,12 @@ public class Board {
 				ArrayList<Move> aVM = allValidMoves();
 				if (aVM.size() >= 1) {
 					for (Move m : aVM) {
-						if(m.toString(this).equals("Qxf2")){
-							System.out.println(getBoardAfterMove(m).isInCheck(WHITE));
-							System.out.println(getBoardAfterMove(m).getKingSquareWhite().toString());
-							System.out.println(getBoardAfterMove(m).getBoardSquares()[5][1].getPiece().availableMoveSquares(this).contains(kingSquareWhite));
-							Main.printBoard(getBoardAfterMove(m));
-						}
 						double newScore = getBoardAfterMove(m)
 								.getWeightedEvaluation(depth + 1, boards,
 										transferPercentage).getDouble();
 						if (newScore <= score) {
 							bestMove = m;
 							score = newScore;
-						}
-						if(m.toString(this).equals("Qxf2")){
-							System.out.println("Test End");
 						}
 					}
 				} else {

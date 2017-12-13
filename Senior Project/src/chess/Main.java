@@ -61,7 +61,6 @@ public class Main {
 				}
 				System.out.println(dm.getMove().toString(b));
 				readCommand(dm.getMove().toString(b), b);
-				System.out.println(dm.getDouble());
 				printBoard(b);
 				//long endTime = System.currentTimeMillis();
 				//System.out.println((endTime - startTime) + " milliseconds");
